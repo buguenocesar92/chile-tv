@@ -1,0 +1,26 @@
+name: Actualizar canales Chile
+
+on:
+  schedule:
+    - cron: "0 */5 * * *"
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Instalar yt-dlp
+        run: pip install yt-dlp
+
+      - name: Generar M3U
+        run: python update.py
+
+      - name: Commit y push
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add canales_chile.m3u
+          git diff --staged --quiet || git commit -m "Update M3U $(date -u '+%Y-%m-%d %H:%M')"
+          git push
