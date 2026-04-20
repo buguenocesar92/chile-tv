@@ -10,13 +10,15 @@ CANALES = [
 def get_stream_url(yt_url):
     try:
         result = subprocess.run(
-            ["yt-dlp", "-g", "--no-warnings", yt_url],
-            capture_output=True, text=True, timeout=30
+            ["yt-dlp", "-g", "--no-warnings", "--js-runtimes", "nodejs", yt_url],
+            capture_output=True, text=True, timeout=60
         )
-        url = result.stdout.strip().splitlines()[0]
-        return url if url.startswith("http") else None
+        print(f"  stdout: {result.stdout[:200]}")
+        print(f"  stderr: {result.stderr[:200]}")
+        lines = [l for l in result.stdout.strip().splitlines() if l.startswith("http")]
+        return lines[0] if lines else None
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"  Excepcion: {e}")
         return None
 
 lines = ["#EXTM3U"]
@@ -28,7 +30,7 @@ for nombre, yt_url in CANALES:
         lines.append(url)
         print("  OK")
     else:
-        print("  FALLO - saltando")
+        print("  FALLO")
 
 with open("canales_chile.m3u", "w") as f:
     f.write("\n".join(lines))
